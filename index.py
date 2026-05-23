@@ -9,7 +9,8 @@ class ControladorColas:
     def __init__(self, root):
         self.root = root
         self.root.title("Calculadora de Colas")
-        self.root.geometry("500x550") 
+        # Se aumentó la altura a 600 para acomodar los nuevos campos de costos
+        self.root.geometry("500x600") 
         self.root.configure(padx=15, pady=15)
 
         self.panel_entradas = PanelEntradas(self.root)
@@ -25,7 +26,6 @@ class ControladorColas:
         try:
             datos = self.panel_entradas.obtener_datos()
 
-            # Ahora le pasamos 'sigma' a la fábrica
             modelo = FabricaModelos.crear_modelo(
                 tipo_modelo=datos["modelo"],
                 lmbda=datos["lmbda"],
@@ -35,6 +35,21 @@ class ControladorColas:
             )
 
             resultados = modelo.calcular()
+
+            if datos["cw"] > 0 or datos["cs"] > 0:
+                
+                servidores_reales = datos["s"] if datos["modelo"] == "M/M/s" else 1
+                
+                lq_val = 0.0
+                for clave, valor in resultados.items():
+                    if "Lq" in clave:
+                        lq_val = float(valor)
+                        break
+                
+                costo_total = modelo.calcular_costo_total(servidores_reales, lq_val, datos["cw"], datos["cs"])
+                
+                resultados["Costo Total (CT)"] = f"${costo_total:.2f}"
+
             self.panel_resultados.mostrar_resultados(resultados)
 
         except ValueError as e:

@@ -38,6 +38,18 @@ class PanelEntradas(tk.LabelFrame):
         self.entry_sigma.configure(state="disabled")
         self.entry_sigma.grid(row=4, column=1, pady=5)
 
+        # 6. Costo de espera (Cw)
+        tk.Label(self, text="Costo de espera (Cw/hora):").grid(row=5, column=0, sticky="w", pady=5)
+        self.entry_cw = tk.Entry(self, width=20)
+        self.entry_cw.insert(0, "0.0")
+        self.entry_cw.grid(row=5, column=1, pady=5)
+
+        # 7. Costo de servicio (Cs)
+        tk.Label(self, text="Costo de servicio (Cs/hora):").grid(row=6, column=0, sticky="w", pady=5)
+        self.entry_cs = tk.Entry(self, width=20)
+        self.entry_cs.insert(0, "0.0")
+        self.entry_cs.grid(row=6, column=1, pady=5)
+
     def _gestionar_estado_campos(self, event):
         modelo = self.combo_modelo.get()
         
@@ -60,22 +72,33 @@ class PanelEntradas(tk.LabelFrame):
             self.entry_sigma.delete(0, tk.END)
 
     def obtener_datos(self):
+        # Validación básica para evitar errores si el usuario deja campos vacíos
         sigma_val = self.entry_sigma.get()
         if not sigma_val or sigma_val.strip() == "":
             sigma_val = "0.0"
+            
+        cw_val = self.entry_cw.get()
+        if not cw_val or cw_val.strip() == "":
+            cw_val = "0.0"
+            
+        cs_val = self.entry_cs.get()
+        if not cs_val or cs_val.strip() == "":
+            cs_val = "0.0"
 
         return {
             "modelo": self.combo_modelo.get(),
             "lmbda": float(self.entry_lambda.get()),
             "mu": float(self.entry_mu.get()),
             "s": int(self.spin_s.get()),
-            "sigma": float(sigma_val)
+            "sigma": float(sigma_val),
+            "cw": float(cw_val),
+            "cs": float(cs_val)
         }
 
 class PanelResultados(tk.LabelFrame):
     def __init__(self, parent):
         super().__init__(parent, text="Métricas Esperadas", padx=10, pady=10)
-        self.texto_salida = tk.Text(self, height=8, font=("Courier", 10), bg="#2b2b2b", fg="#a9b7c6")
+        self.texto_salida = tk.Text(self, height=10, font=("Courier", 10), bg="#2b2b2b", fg="#a9b7c6") # Aumenté un poco el height a 10 para que quepa el costo
         self.texto_salida.pack(fill="both", expand=True)
 
     def mostrar_resultados(self, resultados):
